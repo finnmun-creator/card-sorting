@@ -9,8 +9,10 @@ import CardDetailModal from './CardDetailModal';
 import AddCardButton from './AddCardButton';
 import TierEditor from './TierEditor';
 import { useRealtimeBoard, type BoardEvent } from '@/hooks/useRealtimeBoard';
+import { usePresence } from '@/hooks/usePresence';
 import CaptureButton from './CaptureButton';
 import NicknameModal from './NicknameModal';
+import { getDevice, saveDevice } from '@/lib/device';
 import type { CardDisplayMode } from './CardItem';
 import {
   DndContext,
@@ -40,12 +42,28 @@ export default function Board({ shareCode }: Props) {
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [showTierEditor, setShowTierEditor] = useState(false);
-  const [nickname, setNickname] = useState<string | null>(null);
+  const [device, setDevice] = useState<{ id: string; nickname: string } | null>(null);
+  const [needsNickname, setNeedsNickname] = useState(false);
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>('memo');
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
+
+  useEffect(() => {
+    const stored = getDevice();
+    if (stored) {
+      setDevice(stored);
+    } else {
+      setNeedsNickname(true);
+    }
+  }, []);
+
+  const { participants } = usePresence({
+    sessionId: board?.session.id ?? '',
+    deviceId: device?.id ?? '',
+    nickname: device?.nickname ?? '',
+  });
 
   const { broadcast } = useRealtimeBoard({
     sessionId: board?.session.id ?? '',
@@ -176,8 +194,15 @@ export default function Board({ shareCode }: Props) {
     broadcast({ type: 'card_move', cardId, tierId: newTierId, sortOrder: 0 });
   }
 
+  function handleNicknameSubmit(name: string) {
+    const d = saveDevice(name);
+    setDevice(d);
+    setNeedsNickname(false);
+  }
+
   if (loading) return <div className="text-center py-20 text-[var(--text-tertiary)] text-sm">보드 로딩 중...</div>;
-  if (!nickname) return <NicknameModal onSubmit={setNickname} />;
+  if (needsNickname) return <NicknameModal onSubmit={handleNicknameSubmit} />;
+  if (!device) return <div className="text-center py-20 text-[var(--text-secondary)]">로딩 중...</div>;
   if (!board) return <div className="text-center py-20 text-red-400 text-sm">세션을 찾을 수 없습니다.</div>;
 
   return (
@@ -185,6 +210,20 @@ export default function Board({ shareCode }: Props) {
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-lg font-semibold text-[var(--text-primary)]">Card Sorting</h1>
+        {participants.length > 0 && (
+          <div className="flex items-center gap-1.5">
+            {participants.map((p) => (
+              <div
+                key={p.deviceId}
+                className="w-7 h-7 rounded-full bg-[var(--accent-primary)] text-white text-[10px] font-medium flex items-center justify-center"
+                title={p.nickname}
+              >
+                {p.nickname.charAt(0).toUpperCase()}
+              </div>
+            ))}
+            <span className="text-xs text-[var(--text-tertiary)] ml-1">{participants.length}명 접속 중</span>
+          </div>
+        )}
         <div className="flex items-center gap-2">
           {/* 카드 표시 모드 토글 */}
           <div className="flex items-center border border-[var(--border-default)] rounded-md overflow-hidden">
