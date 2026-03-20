@@ -5,6 +5,9 @@ import { getSessionByShareCode, getBoardState, moveCard } from '@/lib/db';
 import type { BoardState, Card } from '@/types';
 import TierRow from './TierRow';
 import UnsortedArea from './UnsortedArea';
+import CardDetailModal from './CardDetailModal';
+import AddCardButton from './AddCardButton';
+import TierEditor from './TierEditor';
 import {
   DndContext,
   DragOverlay,
@@ -24,6 +27,8 @@ export default function Board({ shareCode }: Props) {
   const [board, setBoard] = useState<BoardState | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeCard, setActiveCard] = useState<Card | null>(null);
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const [showTierEditor, setShowTierEditor] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -52,6 +57,27 @@ export default function Board({ shareCode }: Props) {
       .filter((c) => c.tier_id === null)
       .sort((a, b) => a.sort_order - b.sort_order);
   }, [board?.cards]);
+
+  function handleCardUpdate(updated: Card) {
+    setBoard((prev) => {
+      if (!prev) return prev;
+      return { ...prev, cards: prev.cards.map((c) => (c.id === updated.id ? updated : c)) };
+    });
+  }
+
+  function handleCardDelete(id: string) {
+    setBoard((prev) => {
+      if (!prev) return prev;
+      return { ...prev, cards: prev.cards.filter((c) => c.id !== id) };
+    });
+  }
+
+  function handleCardAdd(card: Card) {
+    setBoard((prev) => {
+      if (!prev) return prev;
+      return { ...prev, cards: [...prev.cards, card] };
+    });
+  }
 
   function handleDragStart(event: DragStartEvent) {
     const card = board?.cards.find((c) => c.id === event.active.id);
@@ -113,8 +139,22 @@ export default function Board({ shareCode }: Props) {
           >
             링크 복사
           </button>
+          <AddCardButton sessionId={board.session.id} onAdd={handleCardAdd} />
+          <button
+            onClick={() => setShowTierEditor(!showTierEditor)}
+            className="bg-gray-800 hover:bg-gray-700 px-3 py-1.5 rounded text-sm transition"
+          >
+            티어 편집
+          </button>
         </div>
       </div>
+
+      {/* 티어 편집 */}
+      {showTierEditor && (
+        <div className="mb-4">
+          <TierEditor tiers={board.tiers} sessionId={board.session.id} onUpdate={loadBoard} />
+        </div>
+      )}
 
       {/* 보드 */}
       <DndContext
@@ -127,11 +167,11 @@ export default function Board({ shareCode }: Props) {
           {board.tiers
             .sort((a, b) => a.sort_order - b.sort_order)
             .map((tier) => (
-              <TierRow key={tier.id} tier={tier} cards={getCardsForTier(tier.id)} />
+              <TierRow key={tier.id} tier={tier} cards={getCardsForTier(tier.id)} onCardClick={setSelectedCard} />
             ))}
         </div>
 
-        <UnsortedArea cards={getUnsortedCards()} />
+        <UnsortedArea cards={getUnsortedCards()} onCardClick={setSelectedCard} />
 
         <DragOverlay>
           {activeCard ? (
@@ -141,6 +181,15 @@ export default function Board({ shareCode }: Props) {
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      {selectedCard && (
+        <CardDetailModal
+          card={selectedCard}
+          onClose={() => setSelectedCard(null)}
+          onUpdate={handleCardUpdate}
+          onDelete={handleCardDelete}
+        />
+      )}
     </div>
   );
 }
