@@ -8,6 +8,9 @@ import UnsortedArea from './UnsortedArea';
 import CardDetailModal from './CardDetailModal';
 import AddCardButton from './AddCardButton';
 import TierEditor from './TierEditor';
+import { useRealtimeBoard, type BoardEvent } from '@/hooks/useRealtimeBoard';
+import CaptureButton from './CaptureButton';
+import NicknameModal from './NicknameModal';
 import {
   DndContext,
   DragOverlay,
@@ -29,10 +32,51 @@ export default function Board({ shareCode }: Props) {
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [selectedCard, setSelectedCard] = useState<Card | null>(null);
   const [showTierEditor, setShowTierEditor] = useState(false);
+  const [nickname, setNickname] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
   );
+
+  const { broadcast } = useRealtimeBoard({
+    sessionId: board?.session.id ?? '',
+    onEvent: (event: BoardEvent) => {
+      switch (event.type) {
+        case 'card_move':
+          setBoard((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              cards: prev.cards.map((c) =>
+                c.id === event.cardId ? { ...c, tier_id: event.tierId, sort_order: event.sortOrder } : c
+              ),
+            };
+          });
+          break;
+        case 'card_add':
+          setBoard((prev) => {
+            if (!prev) return prev;
+            return { ...prev, cards: [...prev.cards, event.card] };
+          });
+          break;
+        case 'card_update':
+          setBoard((prev) => {
+            if (!prev) return prev;
+            return { ...prev, cards: prev.cards.map((c) => (c.id === event.card.id ? event.card : c)) };
+          });
+          break;
+        case 'card_delete':
+          setBoard((prev) => {
+            if (!prev) return prev;
+            return { ...prev, cards: prev.cards.filter((c) => c.id !== event.cardId) };
+          });
+          break;
+        case 'full_sync':
+          loadBoard();
+          break;
+      }
+    },
+  });
 
   useEffect(() => {
     loadBoard();
@@ -63,6 +107,7 @@ export default function Board({ shareCode }: Props) {
       if (!prev) return prev;
       return { ...prev, cards: prev.cards.map((c) => (c.id === updated.id ? updated : c)) };
     });
+    broadcast({ type: 'card_update', card: updated });
   }
 
   function handleCardDelete(id: string) {
@@ -70,6 +115,7 @@ export default function Board({ shareCode }: Props) {
       if (!prev) return prev;
       return { ...prev, cards: prev.cards.filter((c) => c.id !== id) };
     });
+    broadcast({ type: 'card_delete', cardId: id });
   }
 
   function handleCardAdd(card: Card) {
@@ -77,6 +123,7 @@ export default function Board({ shareCode }: Props) {
       if (!prev) return prev;
       return { ...prev, cards: [...prev.cards, card] };
     });
+    broadcast({ type: 'card_add', card });
   }
 
   function handleDragStart(event: DragStartEvent) {
@@ -122,9 +169,11 @@ export default function Board({ shareCode }: Props) {
 
     // DB 업데이트
     await moveCard(cardId, newTierId, 0);
+    broadcast({ type: 'card_move', cardId, tierId: newTierId, sortOrder: 0 });
   }
 
   if (loading) return <div className="text-center py-20 text-gray-400">보드 로딩 중...</div>;
+  if (!nickname) return <NicknameModal onSubmit={setNickname} />;
   if (!board) return <div className="text-center py-20 text-red-400">세션을 찾을 수 없습니다.</div>;
 
   return (
@@ -139,6 +188,7 @@ export default function Board({ shareCode }: Props) {
           >
             링크 복사
           </button>
+          <CaptureButton targetId="board-capture" />
           <AddCardButton sessionId={board.session.id} onAdd={handleCardAdd} />
           <button
             onClick={() => setShowTierEditor(!showTierEditor)}
