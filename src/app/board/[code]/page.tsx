@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import Board from '@/components/Board';
 
 interface Props {
