@@ -398,10 +398,13 @@ export default function Board({ shareCode }: Props) {
 
       {/* 프로젝트 정보 */}
       {project && (
-        <div className="mb-4">
-          <h2 className="text-base font-semibold text-[var(--text-primary)]">{project.title}</h2>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-sm font-semibold text-[var(--text-primary)]">{project.title}</span>
           {project.description && (
-            <p className="text-sm text-[var(--text-secondary)] mt-0.5">{project.description}</p>
+            <>
+              <span className="text-[var(--border-default)]">|</span>
+              <span className="text-sm text-[var(--text-secondary)]">{project.description}</span>
+            </>
           )}
         </div>
       )}
