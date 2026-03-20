@@ -1,6 +1,7 @@
 'use client';
 
 import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import type { Tier, Card } from '@/types';
 import CardItem, { type CardDisplayMode } from './CardItem';
 
@@ -22,23 +23,25 @@ export default function TierRow({ tier, cards, displayMode = 'memo', onCardClick
       >
         {tier.label}
       </div>
-      <div
-        ref={setNodeRef}
-        className={`flex-1 flex flex-wrap items-start gap-2 p-2.5 rounded-r-md border transition ${
-          isOver
-            ? 'border-[var(--accent-primary)] bg-blue-50/50'
-            : 'border-[var(--border-default)] bg-white'
-        }`}
-      >
-        {cards.map((card) => (
-          <CardItem
-            key={card.id}
-            card={card}
-            displayMode={displayMode}
-            onClick={() => onCardClick?.(card)}
-          />
-        ))}
-      </div>
+      <SortableContext items={cards.map((c) => c.id)} strategy={rectSortingStrategy}>
+        <div
+          ref={setNodeRef}
+          className={`flex-1 flex flex-wrap items-start gap-2 p-2.5 rounded-r-md border transition ${
+            isOver
+              ? 'border-[var(--accent-primary)] bg-blue-50/50'
+              : 'border-[var(--border-default)] bg-white'
+          }`}
+        >
+          {cards.map((card) => (
+            <CardItem
+              key={card.id}
+              card={card}
+              displayMode={displayMode}
+              onClick={() => onCardClick?.(card)}
+            />
+          ))}
+        </div>
+      </SortableContext>
     </div>
   );
 }

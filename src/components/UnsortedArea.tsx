@@ -1,6 +1,7 @@
 'use client';
 
 import { useDroppable } from '@dnd-kit/core';
+import { SortableContext, rectSortingStrategy } from '@dnd-kit/sortable';
 import type { Card } from '@/types';
 import CardItem, { type CardDisplayMode } from './CardItem';
 
@@ -20,26 +21,28 @@ export default function UnsortedArea({ cards, displayMode = 'memo', onCardClick,
         <h3 className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wide">미분류</h3>
         {addButton}
       </div>
-      <div
-        ref={setNodeRef}
-        className={`flex flex-wrap items-start gap-2 p-3 rounded-md border-2 border-dashed min-h-[130px] max-h-[260px] overflow-y-auto transition ${
-          isOver
-            ? 'border-[var(--accent-primary)] bg-blue-50/50'
-            : 'border-[var(--border-default)] bg-white/50'
-        }`}
-      >
-        {cards.map((card) => (
-          <CardItem
-            key={card.id}
-            card={card}
-            displayMode={displayMode}
-            onClick={() => onCardClick?.(card)}
-          />
-        ))}
-        {cards.length === 0 && (
-          <div className="text-[var(--text-tertiary)] text-xs m-auto">카드를 여기에 놓으면 미분류됩니다</div>
-        )}
-      </div>
+      <SortableContext items={cards.map((c) => c.id)} strategy={rectSortingStrategy}>
+        <div
+          ref={setNodeRef}
+          className={`flex flex-wrap items-start gap-2 p-3 rounded-md border-2 border-dashed min-h-[130px] max-h-[260px] overflow-y-auto transition ${
+            isOver
+              ? 'border-[var(--accent-primary)] bg-blue-50/50'
+              : 'border-[var(--border-default)] bg-white/50'
+          }`}
+        >
+          {cards.map((card) => (
+            <CardItem
+              key={card.id}
+              card={card}
+              displayMode={displayMode}
+              onClick={() => onCardClick?.(card)}
+            />
+          ))}
+          {cards.length === 0 && (
+            <div className="text-[var(--text-tertiary)] text-xs m-auto">카드를 여기에 놓으면 미분류됩니다</div>
+          )}
+        </div>
+      </SortableContext>
     </div>
   );
 }

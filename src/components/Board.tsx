@@ -17,13 +17,15 @@ import type { CardDisplayMode } from './CardItem';
 import {
   DndContext,
   DragOverlay,
-  closestCenter,
+  pointerWithin,
   PointerSensor,
   useSensor,
   useSensors,
   type DragStartEvent,
   type DragEndEvent,
+  type DragOverEvent,
 } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
 
 const MEMO_COLORS = ['#FFF9C4', '#E8F5E9', '#E3F2FD', '#FCE4EC', '#F3E5F5'];
 function hashColor(id: string): string {
@@ -179,7 +181,7 @@ export default function Board({ shareCode }: Props) {
     const currentCard = board.cards.find((c) => c.id === cardId);
     if (!currentCard) return;
 
-    // 드롭 대상의 티어 결정
+    // Determine target tier
     let newTierId: string | null = null;
     if (overId === 'unsorted') {
       newTierId = null;
@@ -195,11 +197,8 @@ export default function Board({ shareCode }: Props) {
       }
     }
 
-    // 같은 티어 내 순서 변경
+    // Same tier: reorder using arrayMove (insert between, not swap)
     if (currentCard.tier_id === newTierId) {
-      const targetCard = board.cards.find((c) => c.id === overId);
-      if (!targetCard) return;
-
       const tierCards = board.cards
         .filter((c) => c.tier_id === newTierId)
         .sort((a, b) => a.sort_order - b.sort_order);
@@ -208,12 +207,9 @@ export default function Board({ shareCode }: Props) {
       const newIndex = tierCards.findIndex((c) => c.id === overId);
       if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
 
-      // 순서 재계산
-      const reordered = [...tierCards];
-      const [moved] = reordered.splice(oldIndex, 1);
-      reordered.splice(newIndex, 0, moved);
+      const reordered = arrayMove(tierCards, oldIndex, newIndex);
 
-      // 로컬 상태 업데이트
+      // Update local state
       const updatedCards = board.cards.map((c) => {
         const idx = reordered.findIndex((r) => r.id === c.id);
         if (idx !== -1) return { ...c, sort_order: idx };
@@ -221,7 +217,7 @@ export default function Board({ shareCode }: Props) {
       });
       setBoard((prev) => prev ? { ...prev, cards: updatedCards } : prev);
 
-      // DB 업데이트 (각 카드의 sort_order)
+      // Persist to DB
       for (let i = 0; i < reordered.length; i++) {
         if (reordered[i].sort_order !== i) {
           moveCard(reordered[i].id, newTierId, i);
@@ -231,19 +227,42 @@ export default function Board({ shareCode }: Props) {
       return;
     }
 
-    // 다른 티어로 이동
-    setBoard((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        cards: prev.cards.map((c) =>
-          c.id === cardId ? { ...c, tier_id: newTierId, sort_order: 0 } : c
-        ),
-      };
-    });
+    // Cross-tier: move card to new tier
+    // Find insertion index if dropping on a card
+    const targetTierCards = board.cards
+      .filter((c) => c.tier_id === newTierId && c.id !== cardId)
+      .sort((a, b) => a.sort_order - b.sort_order);
 
-    await moveCard(cardId, newTierId, 0);
-    broadcast({ type: 'card_move', cardId, tierId: newTierId, sortOrder: 0 });
+    let insertIndex = targetTierCards.length; // default: end
+    const overCard = board.cards.find((c) => c.id === overId);
+    if (overCard) {
+      const overIndex = targetTierCards.findIndex((c) => c.id === overId);
+      if (overIndex !== -1) insertIndex = overIndex;
+    }
+
+    // Recompute sort orders for target tier
+    const newTargetCards = [...targetTierCards];
+    const movedCard = { ...currentCard, tier_id: newTierId, sort_order: insertIndex };
+    newTargetCards.splice(insertIndex, 0, movedCard);
+
+    // Update all cards' state
+    const updatedCards = board.cards.map((c) => {
+      if (c.id === cardId) return { ...c, tier_id: newTierId, sort_order: insertIndex };
+      const idx = newTargetCards.findIndex((r) => r.id === c.id);
+      if (idx !== -1) return { ...c, sort_order: idx };
+      return c;
+    });
+    setBoard((prev) => prev ? { ...prev, cards: updatedCards } : prev);
+
+    // Persist
+    await moveCard(cardId, newTierId, insertIndex);
+    // Update sort orders for displaced cards
+    for (let i = 0; i < newTargetCards.length; i++) {
+      if (newTargetCards[i].id !== cardId && newTargetCards[i].sort_order !== i) {
+        moveCard(newTargetCards[i].id, newTierId, i);
+      }
+    }
+    broadcast({ type: 'full_sync' });
   }
 
   useEffect(() => {
@@ -426,7 +445,7 @@ export default function Board({ shareCode }: Props) {
       {/* 보드 */}
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCenter}
+        collisionDetection={pointerWithin}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >

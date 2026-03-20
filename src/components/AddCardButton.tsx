@@ -24,7 +24,7 @@ export default function AddCardButton({ sessionId, onAdd }: Props) {
   }
 
   async function handleAdd() {
-    if (!title.trim()) return;
+    if (!title.trim() || adding) return;
     setAdding(true);
     try {
       let imageUrl: string | undefined;
