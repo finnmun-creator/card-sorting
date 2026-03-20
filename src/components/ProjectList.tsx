@@ -14,8 +14,12 @@ export default function ProjectList() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDesc, setEditDesc] = useState('');
+  const [creating, setCreating] = useState(false);
   const [lockingId, setLockingId] = useState<string | null>(null);
   const [lockPassword, setLockPassword] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -32,15 +36,44 @@ export default function ProjectList() {
   }
 
   async function handleCreate() {
-    if (!newTitle.trim()) return;
-    const project = await createProject(newTitle.trim(), newDesc.trim());
-    const session = await createSession(project.id);
-    router.push(`/board/${session.share_code}`);
+    if (!newTitle.trim() || creating) return;
+    setCreating(true);
+    try {
+      const project = await createProject(newTitle.trim(), newDesc.trim());
+      const session = await createSession(project.id);
+      router.push(`/board/${session.share_code}`);
+    } finally {
+      setCreating(false);
+    }
   }
 
-  async function handleDelete(id: string) {
+  function handleDeleteClick(project: Project, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (project.password) {
+      setDeletingId(project.id);
+      setDeletePassword('');
+      setDeleteError(false);
+    } else {
+      doDelete(project.id);
+    }
+  }
+
+  async function doDelete(id: string) {
     await deleteProject(id);
     setProjects((prev) => prev.filter((p) => p.id !== id));
+    setDeletingId(null);
+    setDeletePassword('');
+  }
+
+  function confirmDelete() {
+    const project = projects.find((p) => p.id === deletingId);
+    if (!project) return;
+    if (deletePassword === project.password) {
+      doDelete(project.id);
+    } else {
+      setDeleteError(true);
+      setTimeout(() => setDeleteError(false), 1500);
+    }
   }
 
   function startEdit(project: Project, e: React.MouseEvent) {
@@ -125,7 +158,7 @@ export default function ProjectList() {
             <button onClick={() => { setShowCreate(false); setNewTitle(''); setNewDesc(''); }} className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] h-9 px-3">
               취소
             </button>
-            <button onClick={handleCreate} className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white h-9 px-4 rounded-md text-sm font-medium">
+            <button onClick={handleCreate} disabled={creating} className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white h-9 px-4 rounded-md text-sm font-medium disabled:opacity-50">
               생성
             </button>
           </div>
@@ -236,10 +269,7 @@ export default function ProjectList() {
                       편집
                     </button>
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(project.id);
-                      }}
+                      onClick={(e) => handleDeleteClick(project, e)}
                       className="text-[var(--text-tertiary)] hover:text-red-400 transition text-xs"
                     >
                       삭제
@@ -259,6 +289,23 @@ export default function ProjectList() {
                     />
                     <button onClick={handleSetLock} className="bg-orange-500 text-white text-xs h-8 px-3 rounded-md font-medium">설정</button>
                     <button onClick={(e) => { e.stopPropagation(); setLockingId(null); setLockPassword(''); }} className="text-[var(--text-secondary)] text-xs h-8 px-2">취소</button>
+                  </div>
+                )}
+                {deletingId === project.id && (
+                  <div className="mt-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      autoFocus
+                      type="password"
+                      value={deletePassword}
+                      onChange={(e) => { setDeletePassword(e.target.value); setDeleteError(false); }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') confirmDelete(); if (e.key === 'Escape') { setDeletingId(null); setDeletePassword(''); } }}
+                      placeholder="비밀번호를 입력하세요"
+                      className={`flex-1 bg-[var(--bg-canvas)] border rounded-md px-3 py-1.5 text-sm outline-none ${
+                        deleteError ? 'border-red-400 animate-shake' : 'border-[var(--border-default)] focus:border-red-400'
+                      }`}
+                    />
+                    <button onClick={confirmDelete} className="bg-red-500 text-white text-xs h-8 px-3 rounded-md font-medium">삭제</button>
+                    <button onClick={(e) => { e.stopPropagation(); setDeletingId(null); setDeletePassword(''); }} className="text-[var(--text-secondary)] text-xs h-8 px-2">취소</button>
                   </div>
                 )}
               </div>
