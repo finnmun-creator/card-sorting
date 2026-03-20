@@ -58,6 +58,15 @@ export default function CardItem({ card, displayMode = 'memo', onClick }: Props)
           <p className="text-[var(--text-primary)] text-xs font-medium leading-tight truncate">
             {card.title || '제목 없음'}
           </p>
+          {card.tags && card.tags.length > 0 && (
+            <div className="flex gap-1 mt-0.5">
+              {card.tags.slice(0, 2).map((tag, i) => (
+                <span key={i} className="text-[8px] px-1.5 py-0.5 rounded-full bg-[var(--bg-muted)] text-[var(--text-tertiary)]">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -82,6 +91,15 @@ export default function CardItem({ card, displayMode = 'memo', onClick }: Props)
         <p className="text-[var(--text-secondary)] text-[11px] mt-1.5 leading-relaxed line-clamp-4 flex-1">
           {card.description}
         </p>
+      )}
+      {card.tags && card.tags.length > 0 && (
+        <div className="mt-auto pt-1 flex gap-1 flex-wrap">
+          {card.tags.slice(0, 2).map((tag, i) => (
+            <span key={i} className="text-[9px] px-1.5 py-0.5 rounded-full bg-black/8 text-[var(--text-tertiary)]">
+              {tag}
+            </span>
+          ))}
+        </div>
       )}
     </div>
   );

@@ -11,20 +11,26 @@ interface Props {
 }
 
 export default function TierEditor({ tiers, sessionId, onUpdate }: Props) {
-  const [editing, setEditing] = useState<string | null>(null);
-  const [editLabel, setEditLabel] = useState('');
-  const [editColor, setEditColor] = useState('');
+  const [labels, setLabels] = useState<Record<string, string>>({});
 
-  function startEdit(tier: Tier) {
-    setEditing(tier.id);
-    setEditLabel(tier.label);
-    setEditColor(tier.color);
+  function getLabel(tier: Tier) {
+    return labels[tier.id] ?? tier.label;
   }
 
-  async function saveEdit() {
-    if (!editing) return;
-    await updateTier(editing, { label: editLabel, color: editColor });
-    setEditing(null);
+  async function handleLabelChange(tierId: string, label: string) {
+    setLabels((prev) => ({ ...prev, [tierId]: label }));
+  }
+
+  async function handleLabelBlur(tier: Tier) {
+    const newLabel = (labels[tier.id] ?? tier.label).trim();
+    if (newLabel && newLabel !== tier.label) {
+      await updateTier(tier.id, { label: newLabel });
+      onUpdate();
+    }
+  }
+
+  async function handleColorChange(tierId: string, color: string) {
+    await updateTier(tierId, { color });
     onUpdate();
   }
 
@@ -46,32 +52,20 @@ export default function TierEditor({ tiers, sessionId, onUpdate }: Props) {
         .sort((a, b) => a.sort_order - b.sort_order)
         .map((tier) => (
           <div key={tier.id} className="flex items-center gap-2">
-            {editing === tier.id ? (
-              <>
-                <input
-                  type="color"
-                  value={editColor}
-                  onChange={(e) => setEditColor(e.target.value)}
-                  className="w-7 h-7 rounded cursor-pointer bg-transparent border border-[var(--border-default)]"
-                />
-                <input
-                  value={editLabel}
-                  onChange={(e) => setEditLabel(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                  className="bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded-md px-2 py-1 text-sm flex-1 outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)] transition"
-                  autoFocus
-                />
-                <button onClick={saveEdit} className="text-[var(--accent-primary)] text-sm hover:text-[var(--accent-primary-hover)] transition">저장</button>
-                <button onClick={() => setEditing(null)} className="text-[var(--text-tertiary)] text-sm hover:text-[var(--text-secondary)] transition">취소</button>
-              </>
-            ) : (
-              <>
-                <div className="w-5 h-5 rounded-sm border border-[var(--border-default)]" style={{ backgroundColor: tier.color }} />
-                <span className="flex-1 text-sm text-[var(--text-primary)]">{tier.label}</span>
-                <button onClick={() => startEdit(tier)} className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] text-xs transition">편집</button>
-                <button onClick={() => handleDelete(tier.id)} className="text-[var(--text-tertiary)] hover:text-red-400 text-xs transition">삭제</button>
-              </>
-            )}
+            <input
+              type="color"
+              value={tier.color}
+              onChange={(e) => handleColorChange(tier.id, e.target.value)}
+              className="w-7 h-7 rounded cursor-pointer bg-transparent border border-[var(--border-default)]"
+            />
+            <input
+              value={getLabel(tier)}
+              onChange={(e) => handleLabelChange(tier.id, e.target.value)}
+              onBlur={() => handleLabelBlur(tier)}
+              onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+              className="bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded-md px-2 py-1 text-sm flex-1 outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)] transition"
+            />
+            <button onClick={() => handleDelete(tier.id)} className="text-[var(--text-tertiary)] hover:text-red-400 text-xs transition">삭제</button>
           </div>
         ))}
       <button

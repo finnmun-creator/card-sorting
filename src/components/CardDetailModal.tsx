@@ -76,10 +76,10 @@ export default function CardDetailModal({ card, onClose, onUpdate, onDelete }: P
         {/* 이미지 영역 */}
         {imageUrl && !editing && (
           <div
-            className="w-full h-[220px] bg-[var(--bg-muted)] cursor-zoom-in overflow-hidden"
+            className="w-full max-h-[60vh] bg-[var(--bg-muted)] cursor-zoom-in overflow-y-auto"
             onClick={() => setImageZoom(true)}
           >
-            <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+            <img src={imageUrl} alt="" className="w-full object-contain" />
           </div>
         )}
 
