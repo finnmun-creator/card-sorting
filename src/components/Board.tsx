@@ -208,28 +208,30 @@ export default function Board({ shareCode }: Props) {
   return (
     <div className="max-w-6xl mx-auto py-6 px-4">
       {/* 헤더 */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-semibold text-[var(--text-primary)]">Card Sorting</h1>
-        {participants.length > 0 && (
-          <div className="flex items-center gap-1.5">
-            {participants.map((p) => (
-              <div
-                key={p.deviceId}
-                className="w-7 h-7 rounded-full bg-[var(--accent-primary)] text-white text-[10px] font-medium flex items-center justify-center"
-                title={p.nickname}
-              >
-                {p.nickname.charAt(0).toUpperCase()}
-              </div>
-            ))}
-            <span className="text-xs text-[var(--text-tertiary)] ml-1">{participants.length}명 접속 중</span>
-          </div>
-        )}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <a href="/" className="text-lg font-semibold text-[var(--text-primary)] hover:text-[var(--accent-primary)] transition">Card Sorting</a>
+          {participants.length > 0 && (
+            <div className="flex items-center gap-1.5">
+              {participants.map((p) => (
+                <div
+                  key={p.deviceId}
+                  className="w-7 h-7 rounded-full bg-[var(--accent-primary)] text-white text-[10px] font-medium flex items-center justify-center"
+                  title={p.nickname}
+                >
+                  {p.nickname.charAt(0).toUpperCase()}
+                </div>
+              ))}
+              <span className="text-xs text-[var(--text-tertiary)] ml-0.5">{participants.length}명</span>
+            </div>
+          )}
+        </div>
         <div className="flex items-center gap-2">
-          {/* 카드 표시 모드 토글 */}
-          <div className="flex items-center border border-[var(--border-default)] rounded-md overflow-hidden">
+          {/* 메모/이미지 토글 */}
+          <div className="flex items-center border border-[var(--border-default)] rounded-md overflow-hidden h-9">
             <button
               onClick={() => setCardDisplayMode('memo')}
-              className={`px-3 py-1.5 text-xs transition ${
+              className={`px-3 h-9 text-xs transition ${
                 cardDisplayMode === 'memo'
                   ? 'bg-[var(--accent-primary)] text-white'
                   : 'bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)]'
@@ -239,7 +241,7 @@ export default function Board({ shareCode }: Props) {
             </button>
             <button
               onClick={() => setCardDisplayMode('image')}
-              className={`px-3 py-1.5 text-xs transition ${
+              className={`px-3 h-9 text-xs transition ${
                 cardDisplayMode === 'image'
                   ? 'bg-[var(--accent-primary)] text-white'
                   : 'bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-surface-hover)]'
@@ -248,29 +250,35 @@ export default function Board({ shareCode }: Props) {
               이미지
             </button>
           </div>
-
-          <button
-            onClick={() => navigator.clipboard.writeText(window.location.href)}
-            className="bg-white border border-[var(--border-default)] hover:border-[var(--border-hover)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-primary)] px-3 py-1.5 rounded-md text-xs transition"
-          >
-            링크 복사
-          </button>
-          <CaptureButton targetId="board-capture" />
-          <AddCardButton sessionId={board.session.id} onAdd={handleCardAdd} />
+          {/* 티어 편집 (아이콘) */}
           <button
             onClick={() => setShowTierEditor(!showTierEditor)}
-            className={`bg-white border px-3 py-1.5 rounded-md text-xs transition ${
+            className={`h-9 w-9 flex items-center justify-center rounded-md border transition ${
               showTierEditor
-                ? 'border-[var(--accent-primary)] text-[var(--accent-primary)]'
-                : 'border-[var(--border-default)] hover:border-[var(--border-hover)] text-[var(--text-primary)]'
+                ? 'border-[var(--accent-primary)] text-[var(--accent-primary)] bg-blue-50'
+                : 'border-[var(--border-default)] bg-white text-[var(--text-secondary)] hover:border-[var(--border-hover)] hover:text-[var(--text-primary)]'
             }`}
+            aria-label="티어 편집"
+            title="티어 편집"
           >
-            티어 편집
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+              <path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+              <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+            </svg>
+          </button>
+          {/* 이미지 저장 */}
+          <CaptureButton targetId="board-capture" />
+          {/* 링크 복사 */}
+          <button
+            onClick={() => navigator.clipboard.writeText(window.location.href)}
+            className="bg-white border border-[var(--border-default)] hover:border-[var(--border-hover)] text-[var(--text-primary)] h-9 px-3 rounded-md text-sm transition"
+          >
+            링크 복사
           </button>
         </div>
       </div>
 
-      {/* 티어 편집 */}
+      {/* 티어 편집 패널 */}
       {showTierEditor && (
         <div className="mb-4">
           <TierEditor tiers={board.tiers} sessionId={board.session.id} onUpdate={loadBoard} />
@@ -302,13 +310,14 @@ export default function Board({ shareCode }: Props) {
           cards={getUnsortedCards()}
           displayMode={cardDisplayMode}
           onCardClick={setSelectedCard}
+          addButton={<AddCardButton sessionId={board.session.id} onAdd={handleCardAdd} />}
         />
 
         <DragOverlay>
           {activeCard ? (
             cardDisplayMode === 'image' ? (
-              <div className="w-[160px] bg-white border border-[var(--border-default)] rounded-md overflow-hidden shadow-lg opacity-90">
-                <div className="h-[110px] bg-[var(--bg-muted)]">
+              <div className="w-[130px] bg-white border border-[var(--border-default)] rounded-md overflow-hidden shadow-lg opacity-90">
+                <div className="h-[85px] bg-[var(--bg-muted)]">
                   {activeCard.image_url && (
                     <img src={activeCard.image_url} alt="" className="w-full h-full object-cover" />
                   )}
@@ -319,7 +328,7 @@ export default function Board({ shareCode }: Props) {
               </div>
             ) : (
               <div
-                className="w-[140px] h-[140px] rounded-md p-3 shadow-lg opacity-90 flex flex-col"
+                className="w-[130px] h-[115px] rounded-md p-3 shadow-lg opacity-90 flex flex-col"
                 style={{ backgroundColor: hashColor(activeCard.id) }}
               >
                 <p className="text-xs font-semibold text-[var(--text-primary)]">{activeCard.title || '카드'}</p>

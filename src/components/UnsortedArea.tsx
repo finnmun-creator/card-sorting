@@ -8,17 +8,21 @@ interface Props {
   cards: Card[];
   displayMode?: CardDisplayMode;
   onCardClick?: (card: Card) => void;
+  addButton?: React.ReactNode;
 }
 
-export default function UnsortedArea({ cards, displayMode = 'memo', onCardClick }: Props) {
+export default function UnsortedArea({ cards, displayMode = 'memo', onCardClick, addButton }: Props) {
   const { setNodeRef, isOver } = useDroppable({ id: 'unsorted' });
 
   return (
     <div className="mt-4">
-      <h3 className="text-xs font-medium text-[var(--text-tertiary)] mb-2 uppercase tracking-wide">미분류</h3>
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wide">미분류</h3>
+        {addButton}
+      </div>
       <div
         ref={setNodeRef}
-        className={`flex flex-wrap items-start gap-2 p-3 rounded-md border-2 border-dashed min-h-[160px] transition ${
+        className={`flex flex-wrap items-start gap-2 p-3 rounded-md border-2 border-dashed min-h-[130px] transition ${
           isOver
             ? 'border-[var(--accent-primary)] bg-blue-50/50'
             : 'border-[var(--border-default)] bg-white/50'

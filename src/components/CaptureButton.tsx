@@ -28,7 +28,7 @@ export default function CaptureButton({ targetId }: Props) {
   return (
     <button
       onClick={handleCapture}
-      className="bg-white border border-[var(--border-default)] hover:border-[var(--border-hover)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-primary)] px-3 py-1.5 rounded-md text-sm transition"
+      className="bg-white border border-[var(--border-default)] hover:border-[var(--border-hover)] text-[var(--text-primary)] h-9 px-3 rounded-md text-sm transition"
     >
       이미지 저장
     </button>
