@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { getSessionByShareCode, getBoardState, moveCard } from '@/lib/db';
+import { getSessionByShareCode, getBoardState, moveCard, addParticipant } from '@/lib/db';
 import type { BoardState, Card } from '@/types';
 import TierRow from './TierRow';
 import UnsortedArea from './UnsortedArea';
@@ -117,6 +117,11 @@ export default function Board({ shareCode }: Props) {
     const state = await getBoardState(session.id);
     setBoard(state);
     setLoading(false);
+    // 참여자 기록
+    const d = getDevice();
+    if (d && session.project_id) {
+      addParticipant(session.project_id, d.nickname).catch(() => {});
+    }
   }
 
   const getCardsForTier = useCallback((tierId: string): Card[] => {
@@ -271,7 +276,7 @@ export default function Board({ shareCode }: Props) {
             className="bg-white border border-[var(--border-default)] hover:border-[var(--border-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] h-9 px-3 rounded-md text-sm transition flex items-center gap-1.5"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-              <path d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m9.86-2.822a4.5 4.5 0 0 0-1.242-7.244l4.5-4.5a4.5 4.5 0 0 1 6.364 6.364l-1.757 1.757" />
+              <path d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z" />
             </svg>
             링크 복사
           </button>

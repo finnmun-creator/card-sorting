@@ -9,6 +9,7 @@ export default function ProjectList() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [newTitle, setNewTitle] = useState('');
+  const [newDesc, setNewDesc] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const router = useRouter();
 
@@ -27,7 +28,7 @@ export default function ProjectList() {
 
   async function handleCreate() {
     if (!newTitle.trim()) return;
-    const project = await createProject(newTitle.trim());
+    const project = await createProject(newTitle.trim(), newDesc.trim());
     const session = await createSession(project.id);
     router.push(`/board/${session.share_code}`);
   }
@@ -62,27 +63,29 @@ export default function ProjectList() {
       </div>
 
       {showCreate && (
-        <div className="mb-6 bg-white border border-[var(--border-default)] p-4 rounded-md flex gap-2 shadow-[var(--shadow-sm)]">
+        <div className="mb-6 bg-white border border-[var(--border-default)] p-4 rounded-lg space-y-3">
           <input
             autoFocus
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-            placeholder="프로젝트 이름을 입력하세요"
-            className="flex-1 bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded-md px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-primary)] transition"
+            placeholder="프로젝트 이름"
+            className="w-full bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent-primary)]"
           />
-          <button
-            onClick={handleCreate}
-            className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white px-4 py-2 rounded-md text-sm font-medium transition"
-          >
-            생성
-          </button>
-          <button
-            onClick={() => { setShowCreate(false); setNewTitle(''); }}
-            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-2 text-sm transition"
-          >
-            취소
-          </button>
+          <input
+            value={newDesc}
+            onChange={(e) => setNewDesc(e.target.value)}
+            placeholder="프로젝트 목적 (선택)"
+            className="w-full bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent-primary)]"
+          />
+          <div className="flex justify-end gap-2">
+            <button onClick={() => { setShowCreate(false); setNewTitle(''); setNewDesc(''); }} className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] h-9 px-3">
+              취소
+            </button>
+            <button onClick={handleCreate} className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white h-9 px-4 rounded-md text-sm font-medium">
+              생성
+            </button>
+          </div>
         </div>
       )}
 
@@ -95,24 +98,52 @@ export default function ProjectList() {
           {projects.map((project) => (
             <div
               key={project.id}
-              className="bg-white border border-[var(--border-default)] rounded-md p-4 flex items-center justify-between hover:border-[var(--border-hover)] hover:shadow-[var(--shadow-sm)] transition cursor-pointer"
+              className="bg-white border border-[var(--border-default)] rounded-lg p-4 hover:border-[var(--border-hover)] transition cursor-pointer"
               onClick={() => handleOpen(project.id)}
             >
-              <div>
-                <h2 className="font-medium text-[var(--text-primary)]">{project.title}</h2>
-                <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
-                  {new Date(project.created_at).toLocaleDateString('ko-KR')}
-                </p>
+              <div className="flex items-start justify-between">
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-semibold text-[var(--text-primary)]">{project.title}</h2>
+                  {project.description && (
+                    <p className="text-sm text-[var(--text-secondary)] mt-0.5 truncate">{project.description}</p>
+                  )}
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className="text-xs text-[var(--text-tertiary)]">
+                      {new Date(project.created_at).toLocaleDateString('ko-KR')}
+                    </span>
+                    {project.participants && project.participants.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        <div className="flex -space-x-1.5">
+                          {project.participants.slice(0, 3).map((name, i) => (
+                            <div
+                              key={i}
+                              className="w-5 h-5 rounded-full bg-[var(--accent-primary)] text-white text-[8px] font-medium flex items-center justify-center border border-white"
+                              title={name}
+                            >
+                              {name.charAt(0).toUpperCase()}
+                            </div>
+                          ))}
+                          {project.participants.length > 3 && (
+                            <div className="w-5 h-5 rounded-full bg-[var(--bg-muted)] text-[var(--text-secondary)] text-[8px] flex items-center justify-center border border-white">
+                              +{project.participants.length - 3}
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-xs text-[var(--text-tertiary)]">{project.participants.length}명</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(project.id);
+                  }}
+                  className="text-[var(--text-tertiary)] hover:text-red-400 transition text-xs ml-4"
+                >
+                  삭제
+                </button>
               </div>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(project.id);
-                }}
-                className="text-[var(--text-tertiary)] hover:text-red-400 transition text-sm"
-              >
-                삭제
-              </button>
             </div>
           ))}
         </div>

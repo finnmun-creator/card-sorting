@@ -1,6 +1,8 @@
 export interface Project {
   id: string;
   title: string;
+  description: string;
+  participants: string[];
   creator_id: string | null;
   created_at: string;
   updated_at: string;

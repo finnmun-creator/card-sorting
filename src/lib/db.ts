@@ -22,14 +22,30 @@ export async function getProjects(): Promise<Project[]> {
   return data;
 }
 
-export async function createProject(title: string): Promise<Project> {
+export async function createProject(title: string, description: string = ''): Promise<Project> {
   const { data, error } = await supabase
     .from('projects')
-    .insert({ title })
+    .insert({ title, description })
     .select()
     .single();
   if (error) throw error;
   return data;
+}
+
+export async function addParticipant(projectId: string, nickname: string): Promise<void> {
+  const { data } = await supabase
+    .from('projects')
+    .select('participants')
+    .eq('id', projectId)
+    .single();
+  const current: string[] = data?.participants ?? [];
+  if (!current.includes(nickname)) {
+    const { error } = await supabase
+      .from('projects')
+      .update({ participants: [...current, nickname] })
+      .eq('id', projectId);
+    if (error) throw error;
+  }
 }
 
 export async function deleteProject(id: string): Promise<void> {
