@@ -17,7 +17,7 @@ export default function UnsortedArea({ cards, onCardClick }: Props) {
       <h3 className="text-sm text-gray-400 mb-2">미분류</h3>
       <div
         ref={setNodeRef}
-        className={`flex flex-wrap gap-2 p-4 rounded-lg border-2 border-dashed min-h-[120px] transition ${
+        className={`flex flex-wrap gap-2 p-4 rounded-lg border-2 border-dashed min-h-[180px] transition ${
           isOver ? 'border-blue-500 bg-blue-500/10' : 'border-gray-700 bg-gray-900/50'
         }`}
       >

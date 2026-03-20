@@ -225,8 +225,13 @@ export default function Board({ shareCode }: Props) {
 
         <DragOverlay>
           {activeCard ? (
-            <div className="bg-gray-700 rounded p-2 text-sm shadow-xl opacity-90 w-[88px] h-[88px] flex items-center justify-center">
-              {activeCard.title || '카드'}
+            <div className="bg-white rounded-xl shadow-xl w-[180px] overflow-hidden opacity-90">
+              <div className="h-[100px] bg-gradient-to-br from-emerald-200 to-emerald-300" />
+              <div className="p-3">
+                <h4 className="text-gray-900 font-bold text-sm truncate">
+                  {activeCard.title || '카드'}
+                </h4>
+              </div>
             </div>
           ) : null}
         </DragOverlay>
