@@ -123,7 +123,7 @@ export default function CardDetailModal({ card, onClose, onUpdate, onDelete }: P
 
               <label className="block">
                 <span className={labelClass}>태그 (쉼표 구분)</span>
-                <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="pain, 거래, UX" className={inputClass} />
+                <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="핵심, 개선필요, 아이디어" className={inputClass} />
               </label>
 
               <div className="flex justify-between pt-3 border-t border-[var(--border-default)]">

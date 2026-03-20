@@ -172,21 +172,64 @@ export default function Board({ shareCode }: Props) {
 
     const cardId = active.id as string;
     const overId = over.id as string;
+    if (cardId === overId) return;
 
+    const currentCard = board.cards.find((c) => c.id === cardId);
+    if (!currentCard) return;
+
+    // 드롭 대상의 티어 결정
     let newTierId: string | null = null;
-    if (overId !== 'unsorted') {
+    if (overId === 'unsorted') {
+      newTierId = null;
+    } else {
       const targetTier = board.tiers.find((t) => t.id === overId);
       if (targetTier) {
         newTierId = targetTier.id;
       } else {
         const targetCard = board.cards.find((c) => c.id === overId);
-        newTierId = targetCard?.tier_id ?? null;
+        if (targetCard) {
+          newTierId = targetCard.tier_id;
+        }
       }
     }
 
-    const currentCard = board.cards.find((c) => c.id === cardId);
-    if (currentCard?.tier_id === newTierId) return;
+    // 같은 티어 내 순서 변경
+    if (currentCard.tier_id === newTierId) {
+      const targetCard = board.cards.find((c) => c.id === overId);
+      if (!targetCard) return;
 
+      const tierCards = board.cards
+        .filter((c) => c.tier_id === newTierId)
+        .sort((a, b) => a.sort_order - b.sort_order);
+
+      const oldIndex = tierCards.findIndex((c) => c.id === cardId);
+      const newIndex = tierCards.findIndex((c) => c.id === overId);
+      if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
+
+      // 순서 재계산
+      const reordered = [...tierCards];
+      const [moved] = reordered.splice(oldIndex, 1);
+      reordered.splice(newIndex, 0, moved);
+
+      // 로컬 상태 업데이트
+      const updatedCards = board.cards.map((c) => {
+        const idx = reordered.findIndex((r) => r.id === c.id);
+        if (idx !== -1) return { ...c, sort_order: idx };
+        return c;
+      });
+      setBoard((prev) => prev ? { ...prev, cards: updatedCards } : prev);
+
+      // DB 업데이트 (각 카드의 sort_order)
+      for (let i = 0; i < reordered.length; i++) {
+        if (reordered[i].sort_order !== i) {
+          moveCard(reordered[i].id, newTierId, i);
+        }
+      }
+      broadcast({ type: 'full_sync' });
+      return;
+    }
+
+    // 다른 티어로 이동
     setBoard((prev) => {
       if (!prev) return prev;
       return {
@@ -371,7 +414,7 @@ export default function Board({ shareCode }: Props) {
       {/* 티어 편집 패널 */}
       {showTierEditor && (
         <div className="mb-4">
-          <TierEditor tiers={board.tiers} sessionId={board.session.id} onUpdate={loadBoard} />
+          <TierEditor tiers={board.tiers} sessionId={board.session.id} onUpdate={() => { loadBoard(); broadcast({ type: 'full_sync' }); }} />
         </div>
       )}
 

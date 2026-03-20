@@ -22,7 +22,7 @@ export default function UnsortedArea({ cards, displayMode = 'memo', onCardClick,
       </div>
       <div
         ref={setNodeRef}
-        className={`flex flex-wrap items-start gap-2 p-3 rounded-md border-2 border-dashed min-h-[130px] transition ${
+        className={`flex flex-wrap items-start gap-2 p-3 rounded-md border-2 border-dashed min-h-[130px] max-h-[260px] overflow-y-auto transition ${
           isOver
             ? 'border-[var(--accent-primary)] bg-blue-50/50'
             : 'border-[var(--border-default)] bg-white/50'

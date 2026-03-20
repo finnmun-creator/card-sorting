@@ -14,10 +14,8 @@ interface Props {
 export default function TierRow({ tier, cards, displayMode = 'memo', onCardClick }: Props) {
   const { setNodeRef, isOver } = useDroppable({ id: tier.id });
 
-  const minH = displayMode === 'image' ? 'min-h-[170px]' : 'min-h-[160px]';
-
   return (
-    <div className={`flex ${minH}`}>
+    <div className="flex h-[130px]">
       <div
         className="w-20 shrink-0 flex items-center justify-center font-semibold text-sm rounded-l-md border border-r-0 border-[var(--border-default)]"
         style={{ backgroundColor: tier.color, color: 'var(--text-primary)' }}
@@ -26,7 +24,7 @@ export default function TierRow({ tier, cards, displayMode = 'memo', onCardClick
       </div>
       <div
         ref={setNodeRef}
-        className={`flex-1 flex flex-wrap items-start gap-2 p-2.5 rounded-r-md border transition ${minH} ${
+        className={`flex-1 flex items-start gap-2 p-2.5 rounded-r-md border transition overflow-x-auto ${
           isOver
             ? 'border-[var(--accent-primary)] bg-blue-50/50'
             : 'border-[var(--border-default)] bg-white'

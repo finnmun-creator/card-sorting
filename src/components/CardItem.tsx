@@ -11,13 +11,7 @@ interface Props {
   onClick?: () => void;
 }
 
-const MEMO_COLORS = ['#FFF9C4', '#E8F5E9', '#E3F2FD', '#FCE4EC', '#F3E5F5'];
-
-function hashColor(id: string): string {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  return MEMO_COLORS[Math.abs(hash) % MEMO_COLORS.length];
-}
+const MEMO_COLOR = '#FFF9C4';
 
 export default function CardItem({ card, displayMode = 'memo', onClick }: Props) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -36,11 +30,11 @@ export default function CardItem({ card, displayMode = 'memo', onClick }: Props)
         {...listeners}
         {...attributes}
         onClick={(e) => { if (!isDragging && onClick) { e.stopPropagation(); onClick(); } }}
-        className={`w-[160px] bg-white border border-[var(--border-default)] rounded-md overflow-hidden cursor-grab active:cursor-grabbing select-none shrink-0 transition-shadow ${
+        className={`w-[130px] bg-white border border-[var(--border-default)] rounded-md overflow-hidden cursor-grab active:cursor-grabbing select-none shrink-0 transition-shadow ${
           isDragging ? 'opacity-60 shadow-lg scale-[1.02]' : 'hover:shadow-md hover:border-[var(--border-hover)]'
         }`}
       >
-        <div className="h-[110px] bg-[var(--bg-muted)] overflow-hidden">
+        <div className="h-[85px] bg-[var(--bg-muted)] overflow-hidden">
           {card.image_url ? (
             <img src={card.image_url} alt="" className="w-full h-full object-cover" />
           ) : (
@@ -63,7 +57,7 @@ export default function CardItem({ card, displayMode = 'memo', onClick }: Props)
   }
 
   // memo mode
-  const memoColor = hashColor(card.id);
+  const memoColor = MEMO_COLOR;
   return (
     <div
       ref={setNodeRef}
@@ -71,7 +65,7 @@ export default function CardItem({ card, displayMode = 'memo', onClick }: Props)
       {...listeners}
       {...attributes}
       onClick={(e) => { if (!isDragging && onClick) { e.stopPropagation(); onClick(); } }}
-      className={`w-[140px] h-[140px] rounded-md p-3 cursor-grab active:cursor-grabbing select-none shrink-0 transition-shadow flex flex-col ${
+      className={`w-[130px] h-[115px] rounded-md p-2.5 cursor-grab active:cursor-grabbing select-none shrink-0 transition-shadow flex flex-col ${
         isDragging ? 'opacity-60 shadow-lg scale-[1.02]' : 'hover:shadow-md'
       }`}
     >
@@ -82,13 +76,6 @@ export default function CardItem({ card, displayMode = 'memo', onClick }: Props)
         <p className="text-[var(--text-secondary)] text-[11px] mt-1.5 leading-relaxed line-clamp-4 flex-1">
           {card.description}
         </p>
-      )}
-      {card.tags && card.tags.length > 0 && (
-        <div className="mt-auto pt-1.5">
-          <span className="text-[var(--text-tertiary)] text-[10px]">
-            {card.tags[0]}
-          </span>
-        </div>
       )}
     </div>
   );
