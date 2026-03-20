@@ -447,7 +447,7 @@ export default function Board({ shareCode }: Props) {
               </button>
             </div>
 
-            {/* 참여자 목록 */}
+            {/* 접속 중 */}
             <div className="border-t border-[var(--border-default)] pt-3 mt-3">
               <h4 className="text-xs text-[var(--text-tertiary)] mb-2">접속 중 ({participants.length}명)</h4>
               <div className="space-y-1.5">
@@ -459,10 +459,32 @@ export default function Board({ shareCode }: Props) {
                     <span className="text-sm text-[var(--text-primary)]">
                       {p.nickname}{p.deviceId === device?.id ? ' (나)' : ''}
                     </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* 전체 참여 이력 */}
+            {project?.participants && project.participants.length > 0 && (() => {
+              const onlineNames = new Set(participants.map((p) => p.nickname));
+              const offlineParticipants = project.participants.filter((name) => !onlineNames.has(name));
+              return offlineParticipants.length > 0 ? (
+                <div className="border-t border-[var(--border-default)] pt-3 mt-3">
+                  <h4 className="text-xs text-[var(--text-tertiary)] mb-2">참여 이력 ({offlineParticipants.length}명)</h4>
+                  <div className="space-y-1.5">
+                    {offlineParticipants.map((name) => (
+                      <div key={name} className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-[var(--bg-muted)] text-[var(--text-tertiary)] text-[9px] font-medium flex items-center justify-center">
+                          {name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="text-sm text-[var(--text-tertiary)]">{name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+            })()}
           </div>
         </div>
       )}
