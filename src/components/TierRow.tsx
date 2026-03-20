@@ -2,33 +2,43 @@
 
 import { useDroppable } from '@dnd-kit/core';
 import type { Tier, Card } from '@/types';
-import CardItem from './CardItem';
+import CardItem, { type CardDisplayMode } from './CardItem';
 
 interface Props {
   tier: Tier;
   cards: Card[];
+  displayMode?: CardDisplayMode;
   onCardClick?: (card: Card) => void;
 }
 
-export default function TierRow({ tier, cards, onCardClick }: Props) {
+export default function TierRow({ tier, cards, displayMode = 'memo', onCardClick }: Props) {
   const { setNodeRef, isOver } = useDroppable({ id: tier.id });
 
+  const minH = displayMode === 'image' ? 'min-h-[170px]' : 'min-h-[160px]';
+
   return (
-    <div className="flex min-h-[180px]">
+    <div className={`flex ${minH}`}>
       <div
-        className="w-24 shrink-0 flex items-center justify-center font-bold text-xl rounded-l"
-        style={{ backgroundColor: tier.color, color: '#000' }}
+        className="w-20 shrink-0 flex items-center justify-center font-semibold text-sm rounded-l-md border border-r-0 border-[var(--border-default)]"
+        style={{ backgroundColor: tier.color, color: 'var(--text-primary)' }}
       >
         {tier.label}
       </div>
       <div
         ref={setNodeRef}
-        className={`flex-1 flex flex-wrap gap-2 p-2 rounded-r border-2 transition min-h-[180px] ${
-          isOver ? 'border-blue-500 bg-blue-500/10' : 'border-gray-800 bg-gray-900'
+        className={`flex-1 flex flex-wrap items-start gap-2 p-2.5 rounded-r-md border transition ${minH} ${
+          isOver
+            ? 'border-[var(--accent-primary)] bg-blue-50/50'
+            : 'border-[var(--border-default)] bg-white'
         }`}
       >
         {cards.map((card) => (
-          <CardItem key={card.id} card={card} onClick={() => onCardClick?.(card)} />
+          <CardItem
+            key={card.id}
+            card={card}
+            displayMode={displayMode}
+            onClick={() => onCardClick?.(card)}
+          />
         ))}
       </div>
     </div>

@@ -12,7 +12,7 @@ export default function CaptureButton({ targetId }: Props) {
     if (!node) return;
     try {
       const dataUrl = await toPng(node, {
-        backgroundColor: '#030712',
+        backgroundColor: '#F5F5F5',
         cacheBust: true,
         pixelRatio: 2,
       });
@@ -28,7 +28,7 @@ export default function CaptureButton({ targetId }: Props) {
   return (
     <button
       onClick={handleCapture}
-      className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm font-medium transition"
+      className="bg-white border border-[var(--border-default)] hover:border-[var(--border-hover)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-primary)] px-3 py-1.5 rounded-md text-sm transition"
     >
       이미지 저장
     </button>

@@ -52,7 +52,7 @@ export default function AddCardButton({ sessionId, onAdd }: Props) {
     return (
       <button
         onClick={() => setShowInput(true)}
-        className="bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg text-sm transition"
+        className="bg-white border border-[var(--border-default)] hover:border-[var(--border-hover)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-primary)] px-3 py-1.5 rounded-md text-sm transition"
       >
         + 카드 추가
       </button>
@@ -67,23 +67,26 @@ export default function AddCardButton({ sessionId, onAdd }: Props) {
         onChange={(e) => setTitle(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
         placeholder="카드 제목"
-        className="bg-gray-800 rounded px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+        className="bg-white border border-[var(--border-default)] rounded-md px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-primary)] transition"
       />
       {imagePreview && (
-        <img src={imagePreview} alt="" className="w-10 h-10 rounded object-cover" />
+        <img src={imagePreview} alt="" className="w-8 h-8 rounded-md object-cover border border-[var(--border-default)]" />
       )}
-      <label className="bg-gray-700 hover:bg-gray-600 px-2 py-2 rounded text-sm cursor-pointer transition">
+      <label className="bg-white border border-[var(--border-default)] hover:border-[var(--border-hover)] px-2 py-1.5 rounded-md text-sm cursor-pointer transition text-[var(--text-secondary)]">
         📷
         <input type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
       </label>
       <button
         onClick={handleAdd}
         disabled={adding}
-        className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-sm disabled:opacity-50"
+        className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white px-3 py-1.5 rounded-md text-sm transition disabled:opacity-40"
       >
         추가
       </button>
-      <button onClick={() => { setShowInput(false); setTitle(''); setImageFile(null); setImagePreview(null); }} className="text-gray-400 hover:text-white text-sm">
+      <button
+        onClick={() => { setShowInput(false); setTitle(''); setImageFile(null); setImagePreview(null); }}
+        className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition"
+      >
         취소
       </button>
     </div>

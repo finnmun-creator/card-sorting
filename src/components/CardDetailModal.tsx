@@ -54,47 +54,50 @@ export default function CardDetailModal({ card, onClose, onUpdate, onDelete }: P
     onClose();
   }
 
+  const inputClass = "w-full bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded-md px-3 py-2 mt-1 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-primary)] transition";
+  const labelClass = "text-xs font-medium text-[var(--text-secondary)]";
+
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={onClose}>
       <div
-        className="bg-gray-900 rounded-xl p-6 w-full max-w-md space-y-4"
+        className="bg-white rounded-lg p-6 w-full max-w-md space-y-4 shadow-[var(--shadow-lg)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-lg font-bold">카드 상세</h2>
+        <h2 className="text-base font-semibold text-[var(--text-primary)]">카드 상세</h2>
 
         <label className="block">
-          <span className="text-sm text-gray-400">제목</span>
+          <span className={labelClass}>제목</span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-gray-800 rounded px-3 py-2 mt-1 outline-none focus:ring-2 focus:ring-blue-500"
+            className={inputClass}
           />
         </label>
 
         <label className="block">
-          <span className="text-sm text-gray-400">설명</span>
+          <span className={labelClass}>설명</span>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={4}
-            className="w-full bg-gray-800 rounded px-3 py-2 mt-1 outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className={`${inputClass} resize-none`}
           />
         </label>
 
         <div>
-          <span className="text-sm text-gray-400">이미지</span>
+          <span className={labelClass}>이미지</span>
           {imageUrl && (
             <div className="relative mt-1">
-              <img src={imageUrl} alt="" className="rounded max-h-40 object-contain" />
+              <img src={imageUrl} alt="" className="rounded-md max-h-40 object-contain border border-[var(--border-default)]" />
               <button
                 onClick={() => setImageUrl('')}
-                className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                className="absolute top-1 right-1 bg-white border border-[var(--border-default)] hover:bg-[var(--bg-canvas)] rounded-full w-6 h-6 flex items-center justify-center text-xs text-[var(--text-secondary)] transition"
               >
-                X
+                ✕
               </button>
             </div>
           )}
-          <label className={`mt-2 block w-full text-center border-2 border-dashed border-gray-700 rounded-lg py-3 cursor-pointer hover:border-gray-500 transition text-sm text-gray-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+          <label className={`mt-2 block w-full text-center border border-dashed border-[var(--border-default)] rounded-md py-3 cursor-pointer hover:border-[var(--border-hover)] transition text-sm text-[var(--text-tertiary)] ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
             {uploading ? '업로드 중...' : '이미지 선택'}
             <input
               type="file"
@@ -106,39 +109,42 @@ export default function CardDetailModal({ card, onClose, onUpdate, onDelete }: P
         </div>
 
         <label className="block">
-          <span className="text-sm text-gray-400">태그 (쉼표 구분)</span>
+          <span className={labelClass}>태그 (쉼표 구분)</span>
           <input
             value={tags}
             onChange={(e) => setTags(e.target.value)}
             placeholder="pain, 거래, UX"
-            className="w-full bg-gray-800 rounded px-3 py-2 mt-1 outline-none focus:ring-2 focus:ring-blue-500"
+            className={inputClass}
           />
         </label>
 
         <label className="block">
-          <span className="text-sm text-gray-400">출처</span>
+          <span className={labelClass}>출처</span>
           <input
             value={source}
             onChange={(e) => setSource(e.target.value)}
-            className="w-full bg-gray-800 rounded px-3 py-2 mt-1 outline-none focus:ring-2 focus:ring-blue-500"
+            className={inputClass}
           />
         </label>
 
-        <div className="flex justify-between pt-2">
+        <div className="flex justify-between pt-2 border-t border-[var(--border-default)]">
           <button
             onClick={handleDelete}
-            className="text-red-400 hover:text-red-300 text-sm transition"
+            className="text-red-400 hover:text-red-500 text-sm transition"
           >
             삭제
           </button>
           <div className="flex gap-2">
-            <button onClick={onClose} className="text-gray-400 hover:text-white px-3 py-1.5 transition">
+            <button
+              onClick={onClose}
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] px-3 py-1.5 text-sm transition"
+            >
               취소
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded font-medium transition disabled:opacity-50"
+              className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white px-4 py-1.5 rounded-md text-sm font-medium transition disabled:opacity-40"
             >
               저장
             </button>

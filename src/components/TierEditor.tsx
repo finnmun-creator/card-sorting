@@ -35,13 +35,13 @@ export default function TierEditor({ tiers, sessionId, onUpdate }: Props) {
 
   async function handleAdd() {
     const maxOrder = Math.max(0, ...tiers.map((t) => t.sort_order));
-    await addTier(sessionId, 'New', '#808080', maxOrder + 1);
+    await addTier(sessionId, 'New', '#D5DEE8', maxOrder + 1);
     onUpdate();
   }
 
   return (
-    <div className="bg-gray-900 rounded-xl p-4 space-y-2">
-      <h3 className="text-sm font-semibold text-gray-400 mb-2">티어 편집</h3>
+    <div className="bg-white border border-[var(--border-default)] rounded-md p-4 space-y-2 shadow-[var(--shadow-sm)]">
+      <h3 className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wide mb-3">티어 편집</h3>
       {tiers
         .sort((a, b) => a.sort_order - b.sort_order)
         .map((tier) => (
@@ -52,29 +52,32 @@ export default function TierEditor({ tiers, sessionId, onUpdate }: Props) {
                   type="color"
                   value={editColor}
                   onChange={(e) => setEditColor(e.target.value)}
-                  className="w-8 h-8 rounded cursor-pointer bg-transparent border-0"
+                  className="w-7 h-7 rounded cursor-pointer bg-transparent border border-[var(--border-default)]"
                 />
                 <input
                   value={editLabel}
                   onChange={(e) => setEditLabel(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
-                  className="bg-gray-800 rounded px-2 py-1 text-sm flex-1 outline-none"
+                  className="bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded-md px-2 py-1 text-sm flex-1 outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)] transition"
                   autoFocus
                 />
-                <button onClick={saveEdit} className="text-blue-400 text-sm">저장</button>
-                <button onClick={() => setEditing(null)} className="text-gray-500 text-sm">취소</button>
+                <button onClick={saveEdit} className="text-[var(--accent-primary)] text-sm hover:text-[var(--accent-primary-hover)] transition">저장</button>
+                <button onClick={() => setEditing(null)} className="text-[var(--text-tertiary)] text-sm hover:text-[var(--text-secondary)] transition">취소</button>
               </>
             ) : (
               <>
-                <div className="w-6 h-6 rounded" style={{ backgroundColor: tier.color }} />
-                <span className="flex-1 text-sm">{tier.label}</span>
-                <button onClick={() => startEdit(tier)} className="text-gray-500 hover:text-white text-xs">편집</button>
-                <button onClick={() => handleDelete(tier.id)} className="text-gray-500 hover:text-red-400 text-xs">삭제</button>
+                <div className="w-5 h-5 rounded-sm border border-[var(--border-default)]" style={{ backgroundColor: tier.color }} />
+                <span className="flex-1 text-sm text-[var(--text-primary)]">{tier.label}</span>
+                <button onClick={() => startEdit(tier)} className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] text-xs transition">편집</button>
+                <button onClick={() => handleDelete(tier.id)} className="text-[var(--text-tertiary)] hover:text-red-400 text-xs transition">삭제</button>
               </>
             )}
           </div>
         ))}
-      <button onClick={handleAdd} className="text-blue-400 hover:text-blue-300 text-sm mt-2">
+      <button
+        onClick={handleAdd}
+        className="text-[var(--accent-primary)] hover:text-[var(--accent-primary-hover)] text-sm mt-2 transition"
+      >
         + 행 추가
       </button>
     </div>
