@@ -12,7 +12,7 @@ import { useRealtimeBoard, type BoardEvent } from '@/hooks/useRealtimeBoard';
 import { usePresence } from '@/hooks/usePresence';
 import CaptureButton from './CaptureButton';
 import NicknameModal from './NicknameModal';
-import { getDevice, saveDevice } from '@/lib/device';
+import { getDevice, saveDevice, updateNickname } from '@/lib/device';
 import type { CardDisplayMode } from './CardItem';
 import {
   DndContext,
@@ -45,6 +45,8 @@ export default function Board({ shareCode }: Props) {
   const [device, setDevice] = useState<{ id: string; nickname: string } | null>(null);
   const [needsNickname, setNeedsNickname] = useState(false);
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>('memo');
+  const [showProfileEditor, setShowProfileEditor] = useState(false);
+  const [editNickname, setEditNickname] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -194,10 +196,20 @@ export default function Board({ shareCode }: Props) {
     broadcast({ type: 'card_move', cardId, tierId: newTierId, sortOrder: 0 });
   }
 
+  useEffect(() => {
+    if (device) setEditNickname(device.nickname);
+  }, [device]);
+
   function handleNicknameSubmit(name: string) {
     const d = saveDevice(name);
     setDevice(d);
     setNeedsNickname(false);
+  }
+
+  function handleNicknameChange(name: string) {
+    const d = updateNickname(name);
+    setDevice(d);
+    setShowProfileEditor(false);
   }
 
   if (loading) return <div className="text-center py-20 text-[var(--text-tertiary)] text-sm">보드 로딩 중...</div>;
@@ -209,23 +221,7 @@ export default function Board({ shareCode }: Props) {
     <div className="max-w-6xl mx-auto py-6 px-4">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <a href="/" className="text-lg font-semibold text-[var(--text-primary)] hover:text-[var(--accent-primary)] transition">Card Sorting</a>
-          {participants.length > 0 && (
-            <div className="flex items-center gap-1.5">
-              {participants.map((p) => (
-                <div
-                  key={p.deviceId}
-                  className="w-7 h-7 rounded-full bg-[var(--accent-primary)] text-white text-[10px] font-medium flex items-center justify-center"
-                  title={p.nickname}
-                >
-                  {p.nickname.charAt(0).toUpperCase()}
-                </div>
-              ))}
-              <span className="text-xs text-[var(--text-tertiary)] ml-0.5">{participants.length}명</span>
-            </div>
-          )}
-        </div>
+        <a href="/" className="text-lg font-semibold text-[var(--text-primary)] hover:text-[var(--accent-primary)] transition">Card Sorting</a>
         <div className="flex items-center gap-2">
           {/* 메모/이미지 토글 */}
           <div className="flex items-center border border-[var(--border-default)] rounded-md overflow-hidden h-9">
@@ -250,33 +246,122 @@ export default function Board({ shareCode }: Props) {
               이미지
             </button>
           </div>
-          {/* 티어 편집 (아이콘) */}
+
+          {/* 티어 편집: 아이콘 + 텍스트 */}
           <button
             onClick={() => setShowTierEditor(!showTierEditor)}
-            className={`h-9 w-9 flex items-center justify-center rounded-md border transition ${
+            className={`h-9 flex items-center gap-1.5 px-3 rounded-md border text-sm transition ${
               showTierEditor
                 ? 'border-[var(--accent-primary)] text-[var(--accent-primary)] bg-blue-50'
                 : 'border-[var(--border-default)] bg-white text-[var(--text-secondary)] hover:border-[var(--border-hover)] hover:text-[var(--text-primary)]'
             }`}
-            aria-label="티어 편집"
-            title="티어 편집"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-              <path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-              <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+              <path d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
             </svg>
+            티어 편집
           </button>
+
           {/* 이미지 저장 */}
           <CaptureButton targetId="board-capture" />
+
           {/* 링크 복사 */}
           <button
             onClick={() => navigator.clipboard.writeText(window.location.href)}
-            className="bg-white border border-[var(--border-default)] hover:border-[var(--border-hover)] text-[var(--text-primary)] h-9 px-3 rounded-md text-sm transition"
+            className="bg-white border border-[var(--border-default)] hover:border-[var(--border-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] h-9 px-3 rounded-md text-sm transition flex items-center gap-1.5"
           >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+              <path d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m9.86-2.822a4.5 4.5 0 0 0-1.242-7.244l4.5-4.5a4.5 4.5 0 0 1 6.364 6.364l-1.757 1.757" />
+            </svg>
             링크 복사
           </button>
+
+          {/* 참여자 아바타 (겹치기) */}
+          {participants.length > 0 && (
+            <>
+              <div className="w-px h-6 bg-[var(--border-default)] mx-1" />
+              <div className="flex items-center">
+                <div className="flex -space-x-2">
+                  {participants.slice(0, 4).map((p, i) => (
+                    <div
+                      key={p.deviceId}
+                      className="w-8 h-8 rounded-full bg-[var(--accent-primary)] text-white text-[11px] font-medium flex items-center justify-center border-2 border-white cursor-pointer hover:scale-110 transition-transform"
+                      style={{ zIndex: 4 - i }}
+                      title={p.nickname}
+                      onClick={() => setShowProfileEditor(true)}
+                    >
+                      {p.nickname.charAt(0).toUpperCase()}
+                    </div>
+                  ))}
+                  {participants.length > 4 && (
+                    <div className="w-8 h-8 rounded-full bg-[var(--bg-muted)] text-[var(--text-secondary)] text-[11px] font-medium flex items-center justify-center border-2 border-white">
+                      +{participants.length - 4}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
+
+      {/* 프로필 편집 드롭다운 */}
+      {showProfileEditor && (
+        <div className="fixed inset-0 z-50" onClick={() => setShowProfileEditor(false)}>
+          <div
+            className="absolute top-14 right-4 bg-white rounded-lg shadow-lg border border-[var(--border-default)] p-4 w-64 space-y-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">내 프로필</h3>
+            <div>
+              <label className="text-xs text-[var(--text-secondary)]">닉네임</label>
+              <input
+                value={editNickname}
+                onChange={(e) => setEditNickname(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && editNickname.trim()) {
+                    handleNicknameChange(editNickname.trim());
+                  }
+                }}
+                className="w-full bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded-md px-3 py-2 mt-1 text-sm outline-none focus:border-[var(--accent-primary)]"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowProfileEditor(false)}
+                className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] h-8 px-3"
+              >
+                취소
+              </button>
+              <button
+                onClick={() => {
+                  if (editNickname.trim()) handleNicknameChange(editNickname.trim());
+                }}
+                className="bg-[var(--accent-primary)] text-white text-sm h-8 px-4 rounded-md"
+              >
+                저장
+              </button>
+            </div>
+
+            {/* 참여자 목록 */}
+            <div className="border-t border-[var(--border-default)] pt-3 mt-3">
+              <h4 className="text-xs text-[var(--text-tertiary)] mb-2">접속 중 ({participants.length}명)</h4>
+              <div className="space-y-1.5">
+                {participants.map((p) => (
+                  <div key={p.deviceId} className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-[var(--accent-primary)] text-white text-[9px] font-medium flex items-center justify-center">
+                      {p.nickname.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-sm text-[var(--text-primary)]">
+                      {p.nickname}{p.deviceId === device?.id ? ' (나)' : ''}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 티어 편집 패널 */}
       {showTierEditor && (
