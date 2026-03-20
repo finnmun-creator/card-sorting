@@ -1,31 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <!-- Background: soft blue rounded square -->
-  <rect width="1024" height="1024" rx="220" fill="#4A90D9"/>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B9D"/>
+      <stop offset="35%" stop-color="#F7567C"/>
+      <stop offset="65%" stop-color="#FF8E53"/>
+      <stop offset="100%" stop-color="#FFC857"/>
+    </linearGradient>
+  </defs>
 
-  <!-- Card layer 3: rearmost, rotated left -->
-  <rect x="262" y="310" width="420" height="520" rx="28"
-        fill="rgba(255,255,255,0.18)"
-        transform="rotate(-8 512 570)"/>
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="220" fill="url(#bg)"/>
 
-  <!-- Card layer 2: middle, rotated right -->
-  <rect x="282" y="295" width="420" height="520" rx="28"
-        fill="rgba(255,255,255,0.32)"
-        transform="rotate(4 512 570)"/>
+  <!-- Subtle inner glow -->
+  <rect width="1024" height="1024" rx="220" fill="white" opacity="0.06"/>
 
-  <!-- Card layer 1: frontmost, upright -->
-  <rect x="302" y="280" width="420" height="520" rx="28"
-        fill="rgba(255,255,255,0.55)"/>
+  <!-- Tier bars - white, different widths suggesting ranking -->
+  <!-- S tier - longest -->
+  <rect x="260" y="280" width="504" height="88" rx="18" fill="white" opacity="0.95"/>
 
-  <!-- Lightning bolt: centered over cards, bold clean shape -->
-  <!-- Top point ~y=310, bottom ~y=720, horizontally centered ~x=512 -->
-  <path d="
-    M 548 310
-    L 428 548
-    L 502 548
-    L 458 714
-    L 604 476
-    L 526 476
-    L 600 310
-    Z
-  " fill="white"/>
+  <!-- A tier - medium -->
+  <rect x="260" y="400" width="390" height="88" rx="18" fill="white" opacity="0.75"/>
+
+  <!-- B tier - shorter -->
+  <rect x="260" y="520" width="290" height="88" rx="18" fill="white" opacity="0.55"/>
+
+  <!-- C tier - shortest -->
+  <rect x="260" y="640" width="200" height="88" rx="18" fill="white" opacity="0.38"/>
 </svg>
