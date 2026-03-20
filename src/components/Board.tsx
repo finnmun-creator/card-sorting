@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { getSessionByShareCode, getBoardState, moveCard, addParticipant, getParticipantsByShareCode } from '@/lib/db';
+import { getSessionByShareCode, getBoardState, moveCard, addParticipant, getParticipantsByShareCode, getProjectPasswordByShareCode } from '@/lib/db';
 import type { BoardState, Card } from '@/types';
 import TierRow from './TierRow';
 import UnsortedArea from './UnsortedArea';
@@ -12,6 +12,7 @@ import { useRealtimeBoard, type BoardEvent } from '@/hooks/useRealtimeBoard';
 import { usePresence } from '@/hooks/usePresence';
 import CaptureButton from './CaptureButton';
 import NicknameModal from './NicknameModal';
+import PasswordGate from './PasswordGate';
 import { getDevice, saveDevice, updateNickname } from '@/lib/device';
 import type { CardDisplayMode } from './CardItem';
 import {
@@ -50,6 +51,8 @@ export default function Board({ shareCode }: Props) {
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>('memo');
   const [showProfileEditor, setShowProfileEditor] = useState(false);
   const [editNickname, setEditNickname] = useState('');
+  const [projectPassword, setProjectPassword] = useState<string | null>(null);
+  const [passwordChecked, setPasswordChecked] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -63,6 +66,11 @@ export default function Board({ shareCode }: Props) {
       setNeedsNickname(true);
       getParticipantsByShareCode(shareCode).then(setExistingParticipants).catch(() => {});
     }
+    // Check if project is locked
+    getProjectPasswordByShareCode(shareCode).then((pw) => {
+      setProjectPassword(pw);
+      if (!pw) setPasswordChecked(true);
+    }).catch(() => setPasswordChecked(true));
   }, []);
 
   const { participants } = usePresence({
@@ -282,6 +290,12 @@ export default function Board({ shareCode }: Props) {
   }
 
   if (loading) return <div className="text-center py-20 text-[var(--text-tertiary)] text-sm">보드 로딩 중...</div>;
+  if (projectPassword && !passwordChecked) {
+    return <PasswordGate
+      onSuccess={() => setPasswordChecked(true)}
+      checkPassword={(pw) => pw === projectPassword}
+    />;
+  }
   if (needsNickname) return <NicknameModal existingParticipants={existingParticipants} onSubmit={handleNicknameSubmit} />;
   if (!device) return <div className="text-center py-20 text-[var(--text-secondary)]">로딩 중...</div>;
   if (!board) return <div className="text-center py-20 text-red-400 text-sm">세션을 찾을 수 없습니다.</div>;

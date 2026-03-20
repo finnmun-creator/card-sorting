@@ -2,6 +2,7 @@ export interface Project {
   id: string;
   title: string;
   description: string;
+  password: string | null;
   participants: string[];
   creator_id: string | null;
   created_at: string;

@@ -58,6 +58,25 @@ export async function updateProject(id: string, updates: Partial<Pick<Project, '
   if (error) throw error;
 }
 
+export async function setProjectPassword(projectId: string, password: string | null): Promise<void> {
+  const { error } = await supabase
+    .from('projects')
+    .update({ password, updated_at: new Date().toISOString() })
+    .eq('id', projectId);
+  if (error) throw error;
+}
+
+export async function getProjectPasswordByShareCode(shareCode: string): Promise<string | null> {
+  const session = await getSessionByShareCode(shareCode);
+  if (!session) return null;
+  const { data } = await supabase
+    .from('projects')
+    .select('password')
+    .eq('id', session.project_id)
+    .single();
+  return data?.password ?? null;
+}
+
 // --- Sessions ---
 
 export async function createSession(projectId: string): Promise<Session> {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getProjects, createProject, deleteProject, updateProject, createSession, getSessionsByProject } from '@/lib/db';
+import { getProjects, createProject, deleteProject, updateProject, createSession, getSessionsByProject, setProjectPassword } from '@/lib/db';
 import type { Project } from '@/types';
 import { useRouter } from 'next/navigation';
 
@@ -14,6 +14,8 @@ export default function ProjectList() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDesc, setEditDesc] = useState('');
+  const [lockingId, setLockingId] = useState<string | null>(null);
+  const [lockPassword, setLockPassword] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -59,6 +61,21 @@ export default function ProjectList() {
   function cancelEdit(e?: React.MouseEvent) {
     if (e) e.stopPropagation();
     setEditingId(null);
+  }
+
+  async function handleSetLock(e?: React.MouseEvent) {
+    if (e) e.stopPropagation();
+    if (!lockingId || !lockPassword.trim()) return;
+    await setProjectPassword(lockingId, lockPassword.trim());
+    setProjects((prev) => prev.map((p) => p.id === lockingId ? { ...p, password: lockPassword.trim() } : p));
+    setLockingId(null);
+    setLockPassword('');
+  }
+
+  async function handleUnlock(projectId: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    await setProjectPassword(projectId, null);
+    setProjects((prev) => prev.map((p) => p.id === projectId ? { ...p, password: null } : p));
   }
 
   async function handleOpen(projectId: string) {
@@ -158,7 +175,14 @@ export default function ProjectList() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1 min-w-0">
-                    <h2 className="font-semibold text-[var(--text-primary)]">{project.title}</h2>
+                    <div className="flex items-center gap-1.5">
+                      <h2 className="font-semibold text-[var(--text-primary)]">{project.title}</h2>
+                      {project.password && (
+                        <svg className="w-3.5 h-3.5 text-[var(--text-tertiary)]" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
                     {project.description && (
                       <p className="text-sm text-[var(--text-secondary)] mt-0.5 truncate">{project.description}</p>
                     )}
@@ -190,6 +214,21 @@ export default function ProjectList() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
+                    {project.password ? (
+                      <button
+                        onClick={(e) => handleUnlock(project.id, e)}
+                        className="text-[var(--text-tertiary)] hover:text-orange-500 transition text-xs"
+                      >
+                        잠금해제
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setLockingId(project.id); setLockPassword(''); }}
+                        className="text-[var(--text-tertiary)] hover:text-orange-500 transition text-xs"
+                      >
+                        잠금
+                      </button>
+                    )}
                     <button
                       onClick={(e) => startEdit(project, e)}
                       className="text-[var(--text-tertiary)] hover:text-[var(--accent-primary)] transition text-xs"
@@ -207,6 +246,21 @@ export default function ProjectList() {
                     </button>
                   </div>
                 </div>
+                {lockingId === project.id && (
+                  <div className="mt-2 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      autoFocus
+                      type="password"
+                      value={lockPassword}
+                      onChange={(e) => setLockPassword(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleSetLock(); if (e.key === 'Escape') { setLockingId(null); setLockPassword(''); } }}
+                      placeholder="비밀번호 설정"
+                      className="flex-1 bg-[var(--bg-canvas)] border border-[var(--border-default)] rounded-md px-3 py-1.5 text-sm outline-none focus:border-orange-400"
+                    />
+                    <button onClick={handleSetLock} className="bg-orange-500 text-white text-xs h-8 px-3 rounded-md font-medium">설정</button>
+                    <button onClick={(e) => { e.stopPropagation(); setLockingId(null); setLockPassword(''); }} className="text-[var(--text-secondary)] text-xs h-8 px-2">취소</button>
+                  </div>
+                )}
               </div>
             )
           )}
