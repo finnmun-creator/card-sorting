@@ -308,19 +308,11 @@ export default function Board({ shareCode }: Props) {
   return (
     <div className="max-w-6xl mx-auto py-6 px-4">
       {/* 헤더 */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2">
         <a href="/" className="flex items-center gap-2 text-lg font-semibold text-[var(--text-primary)] hover:text-[var(--accent-primary)] transition">
           <img src="/icon.svg" alt="" className="w-7 h-7 rounded-md" />
           Card Sorting
         </a>
-        {project && (
-          <div className="flex-1 ml-4 min-w-0">
-            <span className="text-sm font-medium text-[var(--text-primary)]">{project.title}</span>
-            {project.description && (
-              <span className="text-xs text-[var(--text-tertiary)] ml-2">{project.description}</span>
-            )}
-          </div>
-        )}
         <div className="flex items-center gap-2">
           {/* 메모/이미지 토글 */}
           <div className="flex items-center border border-[var(--border-default)] rounded-md overflow-hidden h-9">
@@ -403,6 +395,16 @@ export default function Board({ shareCode }: Props) {
           )}
         </div>
       </div>
+
+      {/* 프로젝트 정보 */}
+      {project && (
+        <div className="mb-4">
+          <h2 className="text-base font-semibold text-[var(--text-primary)]">{project.title}</h2>
+          {project.description && (
+            <p className="text-sm text-[var(--text-secondary)] mt-0.5">{project.description}</p>
+          )}
+        </div>
+      )}
 
       {/* 프로필 편집 드롭다운 */}
       {showProfileEditor && (
