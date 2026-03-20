@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <!-- Background -->
+  <rect width="16" height="16" rx="3.5" fill="#4A90D9"/>
+
+  <!-- Card stack (simplified for small size) -->
+  <!-- Card 3: rearmost -->
+  <rect x="2.5" y="4" width="9" height="10" rx="1"
+        fill="rgba(255,255,255,0.2)"
+        transform="rotate(-7 7 9)"/>
+  <!-- Card 2 -->
+  <rect x="3" y="3.5" width="9" height="10" rx="1"
+        fill="rgba(255,255,255,0.35)"
+        transform="rotate(3 7 9)"/>
+  <!-- Card 1: front -->
+  <rect x="3.5" y="3" width="9" height="10" rx="1"
+        fill="rgba(255,255,255,0.55)"/>
+
+  <!-- Lightning bolt -->
+  <path d="
+    M 8.6 3.2
+    L 5.8 8.4
+    L 7.6 8.4
+    L 6.4 12.8
+    L 10.4 7.2
+    L 8.5 7.2
+    L 10.2 3.2
+    Z
+  " fill="white"/>
+</svg>

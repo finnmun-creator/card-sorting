@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Background: soft blue rounded square -->
+  <rect width="1024" height="1024" rx="220" fill="#4A90D9"/>
+
+  <!-- Card layer 3: rearmost, rotated left -->
+  <rect x="262" y="310" width="420" height="520" rx="28"
+        fill="rgba(255,255,255,0.18)"
+        transform="rotate(-8 512 570)"/>
+
+  <!-- Card layer 2: middle, rotated right -->
+  <rect x="282" y="295" width="420" height="520" rx="28"
+        fill="rgba(255,255,255,0.32)"
+        transform="rotate(4 512 570)"/>
+
+  <!-- Card layer 1: frontmost, upright -->
+  <rect x="302" y="280" width="420" height="520" rx="28"
+        fill="rgba(255,255,255,0.55)"/>
+
+  <!-- Lightning bolt: centered over cards, bold clean shape -->
+  <!-- Top point ~y=310, bottom ~y=720, horizontally centered ~x=512 -->
+  <path d="
+    M 548 310
+    L 428 548
+    L 502 548
+    L 458 714
+    L 604 476
+    L 526 476
+    L 600 310
+    Z
+  " fill="white"/>
+</svg>
