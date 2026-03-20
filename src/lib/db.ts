@@ -146,3 +146,16 @@ export async function moveCard(cardId: string, tierId: string | null, sortOrder:
     .eq('id', cardId);
   if (error) throw error;
 }
+
+// --- Image Upload ---
+
+export async function uploadCardImage(sessionId: string, file: File): Promise<string> {
+  const ext = file.name.split('.').pop() || 'png';
+  const path = `${sessionId}/${nanoid(8)}.${ext}`;
+  const { error } = await supabase.storage
+    .from('card-images')
+    .upload(path, file, { upsert: true });
+  if (error) throw error;
+  const { data } = supabase.storage.from('card-images').getPublicUrl(path);
+  return data.publicUrl;
+}

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Card } from '@/types';
-import { updateCard, deleteCard } from '@/lib/db';
+import { updateCard, deleteCard, uploadCardImage } from '@/lib/db';
 
 interface Props {
   card: Card;
@@ -17,6 +17,22 @@ export default function CardDetailModal({ card, onClose, onUpdate, onDelete }: P
   const [tags, setTags] = useState(card.tags.join(', '));
   const [source, setSource] = useState(card.source);
   const [saving, setSaving] = useState(false);
+  const [imageUrl, setImageUrl] = useState(card.image_url || '');
+  const [uploading, setUploading] = useState(false);
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadCardImage(card.session_id, file);
+      setImageUrl(url);
+    } catch (err) {
+      console.error('이미지 업로드 실패:', err);
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -25,6 +41,7 @@ export default function CardDetailModal({ card, onClose, onUpdate, onDelete }: P
       description,
       tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
       source,
+      image_url: imageUrl || null,
     };
     await updateCard(card.id, updates);
     onUpdate({ ...card, ...updates });
@@ -64,12 +81,29 @@ export default function CardDetailModal({ card, onClose, onUpdate, onDelete }: P
           />
         </label>
 
-        {card.image_url && (
-          <div>
-            <span className="text-sm text-gray-400">이미지</span>
-            <img src={card.image_url} alt="" className="mt-1 rounded max-h-40 object-contain" />
-          </div>
-        )}
+        <div>
+          <span className="text-sm text-gray-400">이미지</span>
+          {imageUrl && (
+            <div className="relative mt-1">
+              <img src={imageUrl} alt="" className="rounded max-h-40 object-contain" />
+              <button
+                onClick={() => setImageUrl('')}
+                className="absolute top-1 right-1 bg-black/60 hover:bg-black/80 rounded-full w-6 h-6 flex items-center justify-center text-xs"
+              >
+                X
+              </button>
+            </div>
+          )}
+          <label className={`mt-2 block w-full text-center border-2 border-dashed border-gray-700 rounded-lg py-3 cursor-pointer hover:border-gray-500 transition text-sm text-gray-400 ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+            {uploading ? '업로드 중...' : '이미지 선택'}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+          </label>
+        </div>
 
         <label className="block">
           <span className="text-sm text-gray-400">태그 (쉼표 구분)</span>
