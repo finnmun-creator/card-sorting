@@ -53,6 +53,11 @@ export async function deleteProject(id: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function updateProject(id: string, updates: Partial<Pick<Project, 'title' | 'description'>>): Promise<void> {
+  const { error } = await supabase.from('projects').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) throw error;
+}
+
 // --- Sessions ---
 
 export async function createSession(projectId: string): Promise<Session> {
@@ -82,6 +87,17 @@ export async function getSessionByShareCode(shareCode: string): Promise<Session 
     .single();
   if (error) return null;
   return data;
+}
+
+export async function getParticipantsByShareCode(shareCode: string): Promise<string[]> {
+  const session = await getSessionByShareCode(shareCode);
+  if (!session) return [];
+  const { data } = await supabase
+    .from('projects')
+    .select('participants')
+    .eq('id', session.project_id)
+    .single();
+  return data?.participants ?? [];
 }
 
 export async function getSessionsByProject(projectId: string): Promise<Session[]> {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useDraggable } from '@dnd-kit/core';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
 import type { Card } from '@/types';
 
 export type CardDisplayMode = 'memo' | 'image';
@@ -14,9 +14,17 @@ interface Props {
 const MEMO_COLOR = '#FFF9C4';
 
 export default function CardItem({ card, displayMode = 'memo', onClick }: Props) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef: setDragRef, transform, isDragging } = useDraggable({
     id: card.id,
   });
+  const { setNodeRef: setDropRef, isOver } = useDroppable({
+    id: card.id,
+  });
+
+  const setNodeRef = (node: HTMLElement | null) => {
+    setDragRef(node);
+    setDropRef(node);
+  };
 
   const style = transform
     ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
@@ -32,7 +40,7 @@ export default function CardItem({ card, displayMode = 'memo', onClick }: Props)
         onClick={(e) => { if (!isDragging && onClick) { e.stopPropagation(); onClick(); } }}
         className={`w-[130px] bg-white border border-[var(--border-default)] rounded-md overflow-hidden cursor-grab active:cursor-grabbing select-none shrink-0 transition-shadow ${
           isDragging ? 'opacity-60 shadow-lg scale-[1.02]' : 'hover:shadow-md hover:border-[var(--border-hover)]'
-        }`}
+        } ${isOver ? 'ring-2 ring-[var(--accent-primary)]' : ''}`}
       >
         <div className="h-[85px] bg-[var(--bg-muted)] overflow-hidden">
           {card.image_url ? (
@@ -67,7 +75,7 @@ export default function CardItem({ card, displayMode = 'memo', onClick }: Props)
       onClick={(e) => { if (!isDragging && onClick) { e.stopPropagation(); onClick(); } }}
       className={`w-[130px] h-[115px] rounded-md p-2.5 cursor-grab active:cursor-grabbing select-none shrink-0 transition-shadow flex flex-col ${
         isDragging ? 'opacity-60 shadow-lg scale-[1.02]' : 'hover:shadow-md'
-      }`}
+      } ${isOver ? 'ring-2 ring-[var(--accent-primary)]' : ''}`}
     >
       <p className="text-[var(--text-primary)] text-xs font-semibold leading-tight line-clamp-2">
         {card.title || '제목 없음'}

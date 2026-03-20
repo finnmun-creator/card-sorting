@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { getSessionByShareCode, getBoardState, moveCard, addParticipant } from '@/lib/db';
+import { getSessionByShareCode, getBoardState, moveCard, addParticipant, getParticipantsByShareCode } from '@/lib/db';
 import type { BoardState, Card } from '@/types';
 import TierRow from './TierRow';
 import UnsortedArea from './UnsortedArea';
@@ -44,6 +44,7 @@ export default function Board({ shareCode }: Props) {
   const [showTierEditor, setShowTierEditor] = useState(false);
   const [device, setDevice] = useState<{ id: string; nickname: string } | null>(null);
   const [needsNickname, setNeedsNickname] = useState(false);
+  const [existingParticipants, setExistingParticipants] = useState<string[]>([]);
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>('memo');
   const [showProfileEditor, setShowProfileEditor] = useState(false);
   const [editNickname, setEditNickname] = useState('');
@@ -58,6 +59,7 @@ export default function Board({ shareCode }: Props) {
       setDevice(stored);
     } else {
       setNeedsNickname(true);
+      getParticipantsByShareCode(shareCode).then(setExistingParticipants).catch(() => {});
     }
   }, []);
 
@@ -261,7 +263,7 @@ export default function Board({ shareCode }: Props) {
   }
 
   if (loading) return <div className="text-center py-20 text-[var(--text-tertiary)] text-sm">보드 로딩 중...</div>;
-  if (needsNickname) return <NicknameModal onSubmit={handleNicknameSubmit} />;
+  if (needsNickname) return <NicknameModal existingParticipants={existingParticipants} onSubmit={handleNicknameSubmit} />;
   if (!device) return <div className="text-center py-20 text-[var(--text-secondary)]">로딩 중...</div>;
   if (!board) return <div className="text-center py-20 text-red-400 text-sm">세션을 찾을 수 없습니다.</div>;
 
