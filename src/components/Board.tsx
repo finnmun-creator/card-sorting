@@ -271,7 +271,10 @@ export default function Board({ shareCode }: Props) {
     <div className="max-w-6xl mx-auto py-6 px-4">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
-        <a href="/" className="text-lg font-semibold text-[var(--text-primary)] hover:text-[var(--accent-primary)] transition">Card Sorting</a>
+        <a href="/" className="flex items-center gap-2 text-lg font-semibold text-[var(--text-primary)] hover:text-[var(--accent-primary)] transition">
+          <img src="/icon.svg" alt="" className="w-7 h-7 rounded-md" />
+          Card Sorting
+        </a>
         <div className="flex items-center gap-2">
           {/* 메모/이미지 토글 */}
           <div className="flex items-center border border-[var(--border-default)] rounded-md overflow-hidden h-9">

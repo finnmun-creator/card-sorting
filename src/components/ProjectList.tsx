@@ -76,7 +76,10 @@ export default function ProjectList() {
   return (
     <div className="max-w-2xl mx-auto py-12 px-4">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Card Sorting</h1>
+        <h1 className="flex items-center gap-2.5 text-2xl font-semibold text-[var(--text-primary)]">
+          <img src="/icon.svg" alt="" className="w-8 h-8 rounded-md" />
+          Card Sorting
+        </h1>
         <button
           onClick={() => setShowCreate(true)}
           className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white px-4 py-2 rounded-md text-sm font-medium transition"
