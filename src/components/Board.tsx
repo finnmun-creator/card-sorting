@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { getSessionByShareCode, getBoardState, moveCard, addParticipant, getParticipantsByShareCode, getProjectPasswordByShareCode } from '@/lib/db';
-import type { BoardState, Card } from '@/types';
+import { getSessionByShareCode, getBoardState, moveCard, addParticipant, getParticipantsByShareCode, getProjectPasswordByShareCode, getProject } from '@/lib/db';
+import type { BoardState, Card, Project } from '@/types';
 import TierRow from './TierRow';
 import UnsortedArea from './UnsortedArea';
 import CardDetailModal from './CardDetailModal';
@@ -53,6 +53,7 @@ export default function Board({ shareCode }: Props) {
   const [editNickname, setEditNickname] = useState('');
   const [projectPassword, setProjectPassword] = useState<string | null>(null);
   const [passwordChecked, setPasswordChecked] = useState(false);
+  const [project, setProject] = useState<Project | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -129,6 +130,10 @@ export default function Board({ shareCode }: Props) {
     const state = await getBoardState(session.id);
     setBoard(state);
     setLoading(false);
+    // 프로젝트 정보 로드
+    if (session.project_id) {
+      getProject(session.project_id).then(setProject).catch(() => {});
+    }
     // 참여자 기록
     const d = getDevice();
     if (d && session.project_id) {
@@ -308,6 +313,14 @@ export default function Board({ shareCode }: Props) {
           <img src="/icon.svg" alt="" className="w-7 h-7 rounded-md" />
           Card Sorting
         </a>
+        {project && (
+          <div className="flex-1 ml-4 min-w-0">
+            <span className="text-sm font-medium text-[var(--text-primary)]">{project.title}</span>
+            {project.description && (
+              <span className="text-xs text-[var(--text-tertiary)] ml-2">{project.description}</span>
+            )}
+          </div>
+        )}
         <div className="flex items-center gap-2">
           {/* 메모/이미지 토글 */}
           <div className="flex items-center border border-[var(--border-default)] rounded-md overflow-hidden h-9">
